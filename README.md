@@ -102,4 +102,3 @@ Python 3.8+
 Git
 Virtualenv (recommended)
 
-<br/> <!-- Footer Animation --> <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=100&section=footer&text=🚀+Kiosk+Django+🚀&fontSize=30&fontAlignY=70" width="100%"/></div> ```
