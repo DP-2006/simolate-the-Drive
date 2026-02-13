@@ -1,0 +1,196 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>admin manager</title>
+    <style>
+        body { font-family: Tahoma, sans-serif; padding: 20px; background: #f4f4f4; margin: 0; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; margin-top: 0; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: right; }
+        th { background-color: #f8f9fa; }
+        .btn { padding: 6px 12px; border: none; border-radius: 4px; cursor: pointer; color: white; font-size: 0.9em; text-decoration: none; display: inline-block; }
+        .btn-red { background: #e74c3c; }
+        .btn-green { background: #2ecc71; }
+        .btn-blue { background: #3498db; }
+        .section { margin-bottom: 40px; border: 1px solid #eee; padding: 15px; border-radius: 8px; }
+        .form-group { margin-bottom: 10px; }
+        .form-group label { display: block; margin-bottom: 5px; }
+        .form-group input { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ddd; border-radius: 4px; }
+        .row { display: flex; gap: 10px; }
+        .btn-group { display: flex; gap: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 20px;">
+            <h1>controll panel</h1>
+            <div class="btn-group">
+                <a href="/super-admin/" class="btn btn-red" style="padding: 10px 20px;">
+                    ورود به پنل سوپر ادمین 🛡️
+                </a>
+                <a href="/dashboard/" class="btn btn-blue" style="text-decoration:none; padding: 10px 20px;">bake the dashboard</a>
+            </div>
+        </div>
+
+        <!-- بخش ساخت کاربر جدید -->
+        <div class="section">
+            <h2>create new user</h2>
+            <div class="row">
+                <div class="form-group" style="flex:1;">
+                    <label>usernmae</label>
+                    <input type="text" id="newUsername">
+                </div>
+                <div class="form-group" style="flex:1;">
+                    <label>password</label>
+                    <input type="text" id="newPassword">
+                </div>
+                <div class="form-group" style="flex:1; display:flex; align-items:flex-end;">
+                    <button class="btn btn-green" style="width:100%" onclick="createUser()">create account</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>
+                    <input type="checkbox" id="newIsStaff"> Acsses the all primision  (Admin)
+                </label>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>list user</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>usernam</th>
+                        <th>Roll</th>
+                        <th>situtation</th>
+                        <th>opperation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{% if user.is_staff %}Admin{% else %}User{% endif %}</td>
+                        <td>
+                            {% if user.is_active %}
+                                <span style="color:green">Activ</span>
+                            {% else %}
+                                <span style="color:red">block</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <button class="btn btn-blue" onclick="promptChangePassword({{ user.id }})">change the password</button>
+                            {% if user.is_active %}
+                                <button class="btn btn-red" onclick="blockUser({{ user.id }})">block</button>
+                            {% else %}
+                                <button class="btn btn-green" onclick="unblockUser({{ user.id }})">Activ</button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>HIsstory of file sending</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name folder </th>
+                        <th>user</th>
+                        <th>folder</th>
+                        <th>Date</th>
+                        <th>opperation</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for file in history %}
+                    <tr>
+                        <td>{{ file.file.name }}</td>
+                        <td>{{ file.uploaded_by.username }}</td>
+                        <td>{{ file.folder_name|default:"-" }}</td>
+                        <td>{{ file.uploaded_at|date:"Y-m-d H:i" }}</td>
+                        <td>
+                            <button class="btn btn-red" onclick="deleteFile({{ file.id }})">Delet</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        async function createUser() {
+            const u = document.getElementById('newUsername').value;
+            const p = document.getElementById('newPassword').value;
+            const staff = document.getElementById('newIsStaff').checked;
+            
+            if(!u || !p) return alert('this fild is shoud write it');
+
+            const res = await sendAction('create_user', null, null, {username: u, password: p, is_staff: staff});
+            if(res.success) {
+                alert('the account for user has been create sucssefully ');
+                location.reload();
+            }
+        }
+
+        function promptChangePassword(userId) {
+            const newPass = prompt('please Enter the nwe password');
+            if(newPass) {
+                sendAction('change_password', userId, null, {new_password: newPass}).then(res => {
+                    if(res.success) alert('password was change');
+                });
+            }
+        }
+
+        async function blockUser(id) {
+            if(!confirm('Are you sure for bloke this user?')) return;
+            await sendAction('block_user', id);
+        }
+
+        async function unblockUser(id) {
+            await sendAction('unblock_user', id);
+        }
+
+        async function deleteFile(id) {
+            if(!confirm('Are you sure to delet this user? you cant back your user !!')) return;
+            await sendAction('delete_file', null, id);
+        }
+
+        async function sendAction(action, userId=null, fileId=null, extraData={}) {
+            const body = { action: action, ...extraData };
+            if(userId) body.user_id = userId;
+            if(fileId) body.file_id = fileId;
+
+            const res = await fetch('/api/admin-action/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken')},
+                body: JSON.stringify(body)
+            });
+            return await res.json();
+        }
+    </script>
+</body>
+</html>
