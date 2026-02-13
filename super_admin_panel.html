@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>پنل سوپر ادمین | سیستم کیوسک</title>
+    
+    <!-- Bootstrap 5 RTL CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.rtl.min.css">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Vazirmatn Font (Persian) -->
+    <link href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css" rel="stylesheet" type="text/css" />
+
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --bg-light: #f8f9fa;
+            --sidebar-width: 260px;
+        }
+
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--bg-light);
+            overflow-x: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            position: fixed;
+            top: 0;
+            right: 0;
+            background: #fff;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.05);
+            z-index: 1000;
+            padding-top: 20px;
+            transition: all 0.3s;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px 20px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            border-bottom: 1px solid #eee;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-link {
+            color: #555;
+            padding: 12px 20px;
+            border-radius: 0 25px 25px 0;
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background-color: rgba(67, 97, 238, 0.1);
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        /* Main Content */
+        .main-content {
+            margin-right: var(--sidebar-width);
+            padding: 30px;
+            transition: all 0.3s;
+        }
+
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+            margin-bottom: 25px;
+            background: #fff;
+        }
+
+        .card-header {
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 20px;
+            border-radius: 15px 15px 0 0 !important;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Form Controls */
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.15);
+        }
+
+        /* Role Badge Style */
+        .role-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Table Styles */
+        .table thead th {
+            border-bottom: 2px solid #f0f0f0;
+            color: #666;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #fff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        /* Switch Toggle */
+        .form-check-input:checked {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+
+        /* Status Badges */
+        .badge-active { background-color: #d1e7dd; color: #0f5132; }
+        .badge-inactive { background-color: #f8d7da; color: #842029; }
+        .badge-blocked { background-color: #fff3cd; color: #856404; }
+
+        /* Toast Container */
+        .toast-container { position: fixed; bottom: 20px; left: 20px; z-index: 1055; }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .sidebar { transform: translateX(100%); }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-right: 0; }
+            .overlay {
+                display: none; position: fixed; top: 0; left: 0;
+                width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 999;
+            }
+            .overlay.active { display: block; }
+        }
+        
+        /* Permission Checkbox Style */
+        .permission-item {
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .permission-item:hover {
+            background-color: #e9ecef !important;
+            border-color: var(--primary-color);
+        }
+        .permission-checkbox {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay for Mobile Sidebar -->
+    <div class="overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-shield-alt"></i>
+            <span>مدیریت کل</span>
+        </div>
+        <div class="d-flex flex-column">
+            <a href="{% url 'dashboard' %}" class="nav-link">
+                <i class="fas fa-home"></i>
+                <span>داشبورد</span>
+            </a>
+            <a href="#" class="nav-link">
+                <i class="fas fa-users-cog"></i>
+                <span>مدیریت کاربران</span>
+            </a>
+            <a href="#" class="nav-link active">
+                <i class="fas fa-user-shield"></i>
+                <span>تنظیمات سیاستی</span>
+            </a>
+            <a href="#" class="nav-link">
+                <i class="fas fa-file-alt"></i>
+                <span>گزارشات</span>
+            </a>
+            <hr>
+            <a href="{% url 'login' %}?next=/logout" class="nav-link text-danger">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>خروج</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Topbar Mobile Toggle -->
+        <div class="d-flex justify-content-between align-items-center mb-4 d-lg-none">
+            <button class="btn btn-light" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <h4 class="m-0">پنل مدیریت</h4>
+        </div>
+
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">تنظیمات سیستم و دسترسی‌ها</h2>
+                <p class="text-muted">مدیریت رمز عبور، کاربران و سطوح دسترسی</p>
+            </div>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-sync-alt ms-2"></i> بروزرسانی
+                </button>
+                <div class="dropdown">
+                    <button class="btn btn-light dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown">
+                        <img src="https://picsum.photos/seed/{{ request.user.username }}/40/40" class="avatar" alt="Admin">
+                        <span class="d-none d-md-block">{{ request.user.get_full_name|default:request.user.username }}</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end text-end">
+                        <li><a class="dropdown-item" href="#">پروفایل</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="{% url 'login' %}?next=/logout">خروج</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Column 1: Password Policy & Create Role -->
+            <div class="col-lg-4">
+                <!-- Password Policy Card -->
+                <div class="card h-100">
+                    <div class="card-header">
+                        <span><i class="fas fa-lock ms-2 text-primary"></i>سیاست رمز عبور</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="policyForm">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label for="minLength" class="form-label">حداقل طول رمز عبور</label>
+                                <input type="number" class="form-control" id="minLength" name="min_password_length" value="{{ policy.min_password_length }}" min="4" max="32">
+                                <div class="form-text">تعداد کاراکترهای مجاز برای رمز عبور جدید.</div>
+                            </div>
+
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="reqUpper" name="require_uppercase" {% if policy.require_uppercase %}checked{% endif %}>
+                                <label class="form-check-label" for="reqUpper">الزامی بودن حروف بزرگ (A-Z)</label>
+                            </div>
+
+                            <div class="form-check form-switch mb-3">
+                                <input class="form-check-input" type="checkbox" id="reqDigit" name="require_digit" {% if policy.require_digit %}checked{% endif %}>
+                                <label class="form-check-label" for="reqDigit">الزامی بودن اعداد (0-9)</label>
+                            </div>
+
+                            <div class="form-check form-switch mb-4">
+                                <input class="form-check-input" type="checkbox" id="reqSpecial" name="require_special_char" {% if policy.require_special_char %}checked{% endif %}>
+                                <label class="form-check-label" for="reqSpecial">الزامی بودن کاراکتر خاص (!@#$...)</label>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="button" class="btn btn-success" onclick="savePolicy()">
+                                    <i class="fas fa-save ms-2"></i> ذخیره تنظیمات
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Create New Role Card -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <span><i class="fas fa-plus-circle ms-2 text-primary"></i>ایجاد نقش جدید</span>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'create_role' %}">
+                            {% csrf_token %}
+                            <div class="input-group mb-3">
+                                <input type="text" name="role_name" class="form-control" placeholder="نام نقش (مثال: نویسنده، مدیر محتوا)" required>
+                                <button type="submit" class="btn btn-primary">ایجاد نقش</button>
+                            </div>
+                            <small class="text-muted">نقش‌های ساخته شده در کنار نقش‌های پیش‌فرض نمایش داده می‌شوند.</small>
+                        </form>
+                        
+                        <!-- نمایش لیست نقش‌های موجود -->
+                        <hr>
+                        <h6 class="mb-2">نقش‌های موجود:</h6>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% for role in all_roles %}
+                                <span class="role-badge" style="background: #e9ecef; color: #495057;">
+                                    <i class="fas fa-tag"></i> {{ role.name }}
+                                </span>
+                            {% empty %}
+                                <span class="text-muted">نقشی تعریف نشده است</span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Column 2: User Management -->
+            <div class="col-lg-8">
+                <div class="card h-100">
+                    <div class="card-header">
+                        <span><i class="fas fa-users ms-2 text-primary"></i>لیست کاربران و پرسنل</span>
+                        <div class="input-group input-group-sm" style="width: 250px;">
+                            <span class="input-group-text bg-light"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" id="userSearch" placeholder="جستجو نام یا کد ملی..." onkeyup="filterUsers()">
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="bg-light">
+                                    <tr>
+                                        <th class="ps-4">کاربر</th>
+                                        <th>کد ملی</th>
+                                        <th>نقش</th>
+                                        <th>وضعیت</th>
+                                        <th class="text-end pe-4">عملیات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="userTableBody">
+                                    {% for user in users %}
+                                    <tr id="user-row-{{ user.id }}">
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <img src="https://picsum.photos/seed/{{ user.username }}/40/40" class="avatar ms-3" alt="{{ user.username }}">
+                                                <div>
+                                                    <h6 class="mb-0 fw-bold">{{ user.first_name }} {{ user.last_name }}</h6>
+                                                    <small class="text-muted">@{{ user.username }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="font-family-monospace" dir="ltr">{{ user.userprofile.national_code|default:"-" }}</span></td>
+                                        
+                                        <!-- نقش‌ها - نمایش نقش‌های سفارشی کنار نقش‌های پیش‌فرض -->
+                                        <td>
+                                            <div class="d-flex flex-wrap gap-1 align-items-center">
+                                                {% if user.is_superuser %}
+                                                    <span class="role-badge" style="background: #d1e7dd; color: #0f5132;">
+                                                        <i class="fas fa-star"></i> سوپر ادمین
+                                                    </span>
+                                                {% elif user.is_staff %}
+                                                    <span class="role-badge" style="background: #cfe2ff; color: #084298;">
+                                                        <i class="fas fa-shield-alt"></i> Admin
+                                                    </span>
+                                                {% endif %}
+                                                
+                                                <!-- نمایش نقش‌های سفارشی که به کاربر اختصاص داده شده -->
+                                                {% for group in user.groups.all %}
+                                                    <span class="role-badge" style="background: #e9ecef; color: #495057;">
+                                                        <i class="fas fa-id-badge"></i> {{ group.name }}
+                                                    </span>
+                                                {% endfor %}
+                                                
+                                                <!-- اگر کاربر هیچ نقشی نداشت -->
+                                                {% if not user.groups.all and not user.is_staff and not user.is_superuser %}
+                                                    <span class="role-badge" style="background: #f8f9fa; color: #6c757d; border: 1px solid #dee2e6;">
+                                                        <i class="fas fa-user"></i> کاربر عادی
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            {% if user.userprofile.is_blocked %}
+                                                <span class="badge badge-blocked rounded-pill">
+                                                    <i class="fas fa-ban ms-1"></i> مسدود
+                                                </span>
+                                            {% elif user.is_active %}
+                                                <span class="badge badge-active rounded-pill">
+                                                    <i class="fas fa-check-circle ms-1"></i> فعال
+                                                </span>
+                                            {% else %}
+                                                <span class="badge badge-inactive rounded-pill">
+                                                    <i class="fas fa-times-circle ms-1"></i> غیرفعال
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        
+                                        <td class="text-end pe-4">
+                                            <!-- دکمه تغییر وضعیت مسدودیت -->
+                                            <button class="btn btn-sm btn-light text-warning" title="تغییر وضعیت مسدودیت" onclick="toggleBlock({{ user.id }})">
+                                                {% if user.userprofile.is_blocked %}
+                                                    <i class="fas fa-lock-open"></i>
+                                                {% else %}
+                                                    <i class="fas fa-lock"></i>
+                                                {% endif %}
+                                            </button>
+                                            
+                                            <!-- دکمه ویرایش -->
+                                            <button class="btn btn-sm btn-light text-primary" title="ویرایش کاربر" onclick="editUser({{ user.id }})">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            
+                                            <!-- دکمه حذف (فقط برای کاربران غیر از خودش) -->
+                                            {% if user.id != request.user.id %}
+                                            <button class="btn btn-sm btn-light text-danger" title="حذف کاربر" onclick="deleteUser({{ user.id }})">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                            {% endif %}
+                                            
+                                            <!-- دکمه اختصاص نقش - نمایش همه نقش‌ها به جز نقش‌هایی که کاربر دارد -->
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-light text-primary" type="button" data-bs-toggle="dropdown" title="اختصاص نقش">
+                                                    <i class="fas fa-user-tag"></i>
+                                                </button>
+                                                <ul class="dropdown-menu dropdown-menu-end">
+                                                    {% for role in all_roles %}
+                                                        {% if role not in user.groups.all %}
+                                                        <li>
+                                                            <a class="dropdown-item" href="#" onclick="assignRole({{ user.id }}, {{ role.id }})">
+                                                                <i class="fas fa-plus ms-2"></i> {{ role.name }}
+                                                            </a>
+                                                        </li>
+                                                        {% else %}
+                                                        <li>
+                                                            <a class="dropdown-item text-danger" href="#" onclick="removeRole({{ user.id }}, {{ role.id }})">
+                                                                <i class="fas fa-minus ms-2"></i> حذف {{ role.name }}
+                                                            </a>
+                                                        </li>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </ul>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-muted">کاربری یافت نشد.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 3: Permissions Management (ویرایش شد) -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <span><i class="fas fa-key ms-2 text-primary"></i>مدیریت دسترسی‌های سیستم (Permissions)</span>
+                        <div>
+                            <button class="btn btn-sm btn-success" onclick="selectAllPermissions()">
+                                <i class="fas fa-check-double ms-1"></i> انتخاب همه
+                            </button>
+                            <button class="btn btn-sm btn-secondary" onclick="deselectAllPermissions()">
+                                <i class="fas fa-times ms-1"></i> لغو انتخاب همه
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info border-0 bg-info bg-opacity-10">
+                            <i class="fas fa-info-circle ms-2"></i>
+                            پرمیشن‌های موجود در سیستم. می‌توانید انتخاب کنید و به نقش‌ها اختصاص دهید.
+                        </div>
+                        
+                        <form id="permissionsForm" method="post" action="{% url 'save_permissions' %}">
+                            {% csrf_token %}
+                            <div class="row g-3">
+                                {% for perm in all_perms %}
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="form-check card p-2 mb-0 bg-light permission-item">
+                                        <input class="form-check-input permission-checkbox ms-2" 
+                                               type="checkbox" 
+                                               name="permissions" 
+                                               value="{{ perm.id }}" 
+                                               id="perm_{{ perm.id }}">
+                                        <label class="form-check-label small" for="perm_{{ perm.id }}">
+                                            <strong>{{ perm.name }}</strong>
+                                            <br>
+                                            <small class="text-muted">{{ perm.codename }}</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <div class="mt-4">
+                                <label for="roleSelect" class="form-label">اختصاص به نقش:</label>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <select class="form-select" id="roleSelect" name="role_id">
+                                            <option value="">انتخاب نقش...</option>
+                                            {% for role in all_roles %}
+                                            <option value="{{ role.id }}">{{ role.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save ms-2"></i> ذخیره دسترسی‌ها برای نقش
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Toast Notification Container -->
+    <div class="toast-container p-3">
+        <div id="liveToast" class="toast align-items-center text-white bg-primary border-0" role="alert" aria-live="assertive" aria-atomic="true">
+            <div class="d-flex">
+                <div class="toast-body">
+                    <i class="fas fa-check-circle me-2"></i> <span id="toastMessage">عملیات با موفقیت انجام شد.</span>
+                </div>
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- App Logic -->
+    <script>
+        // --- Helper: Get CSRF Token ---
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // --- Toast Helper ---
+        function showToast(message, type = 'success') {
+            const toastEl = document.getElementById('liveToast');
+            const toastBody = document.getElementById('toastMessage');
+            
+            toastEl.className = `toast align-items-center text-white border-0 bg-${type}`;
+            toastBody.innerHTML = message;
+
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+        }
+
+        // --- 1. Save Policy Logic ---
+        function savePolicy() {
+            const btn = document.querySelector('#policyForm button');
+            const originalText = btn.innerHTML;
+            
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin ms-2"></i> ذخیره...';
+            btn.disabled = true;
+
+            const formData = new FormData(document.getElementById('policyForm'));
+            formData.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+
+            fetch('/api/super-admin-action/', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                if (data.status === 'success') {
+                    showToast('تنظیمات سیاست رمز عبور ذخیره شد.', 'success');
+                } else {
+                    showToast('خطا در ذخیره اطلاعات.', 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                showToast('خطای ارتباط با سرور.', 'danger');
+            });
+        }
+
+        // --- 2. Filter Users ---
+        function filterUsers() {
+            const query = document.getElementById('userSearch').value.toLowerCase();
+            const rows = document.querySelectorAll('#userTableBody tr');
+            
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? '' : 'none';
+            });
+        }
+
+        // --- 3. User Actions ---
+        function editUser(userId) {
+            window.location.href = `/edit-user/${userId}/`;
+        }
+
+        function deleteUser(userId) {
+            if (confirm('آیا از حذف این کاربر اطمینان دارید؟')) {
+                fetch(`/api/delete-user/${userId}/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('کاربر با موفقیت حذف شد.', 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast('خطا در حذف کاربر: ' + data.error, 'danger');
+                    }
+                })
+                .catch(error => {
+                    showToast('خطای ارتباط با سرور.', 'danger');
+                });
+            }
+        }
+
+        function toggleBlock(userId) {
+            if (confirm(`آیا از تغییر وضعیت مسدودیت این کاربر اطمینان دارید؟`)) {
+                fetch('/api/toggle-block/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `user_id=${userId}`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast('خطا: ' + data.error, 'danger');
+                    }
+                })
+                .catch(error => {
+                    showToast('خطای ارتباط با سرور.', 'danger');
+                });
+            }
+        }
+
+        function assignRole(userId, roleId) {
+            fetch('/api/assign-role/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `user_id=${userId}&role_id=${roleId}&action=add`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showToast(data.message, 'success');
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    showToast('خطا: ' + data.error, 'danger');
+                }
+            })
+            .catch(error => {
+                showToast('خطای ارتباط با سرور.', 'danger');
+            });
+        }
+
+        function removeRole(userId, roleId) {
+            if (confirm('آیا از حذف این نقش از کاربر اطمینان دارید؟')) {
+                fetch('/api/assign-role/', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `user_id=${userId}&role_id=${roleId}&action=remove`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast(data.message, 'success');
+                        setTimeout(() => location.reload(), 1500);
+                    } else {
+                        showToast('خطا: ' + data.error, 'danger');
+                    }
+                })
+                .catch(error => {
+                    showToast('خطای ارتباط با سرور.', 'danger');
+                });
+            }
+        }
+
+        // --- 4. Permission Functions ---
+        function selectAllPermissions() {
+            document.querySelectorAll('.permission-checkbox').forEach(cb => cb.checked = true);
+        }
+
+        function deselectAllPermissions() {
+            document.querySelectorAll('.permission-checkbox').forEach(cb => cb.checked = false);
+        }
+
+        // --- 5. Mobile Sidebar Toggle ---
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        const toggleBtn = document.getElementById('sidebarToggle');
+
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('active');
+                overlay.classList.toggle('active');
+            });
+        }
+
+        overlay.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+        });
+    </script>
+</body>
+</html>
