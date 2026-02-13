@@ -17,15 +17,6 @@
   [Demo](#-demo) • 
   [Contributing](#-contributing)
   
-  <!-- Animated Demo -->
-  <div align="center">
-    <img src="https://raw.githubusercontent.com/yourusername/kiosk-django/main/docs/demo.gif" alt="Dashboard Demo" width="800"/>
-    
-    <!-- Upload Animation -->
-    <div style="margin-top: 20px;">
-      <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=16&duration=2000&pause=500&color=36BCF7&center=true&vCenter=true&width=435&lines=📤+Uploading+file...;⚡+50%25+complete...;✅+Upload+successful!;🚀+Ready+to+go!" alt="Upload Animation" />
-    </div>
-  </div>
   
   <!-- Success Toast Animation -->
   <div align="center" style="margin-top: 20px;">
