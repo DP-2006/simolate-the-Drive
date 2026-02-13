@@ -1,7 +1,7 @@
 <div align="center">
   <img src="https://raw.githubusercontent.com/yourusername/kiosk-django/main/docs/logo.png" alt="Kiosk Logo" width="200"/>
   
-  # 🏪 Kiosk Django - Advanced File Management System
+  # 🏪 SAFEDRIVE(SF) - Advanced File Management System
   
   [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
   [![Django](https://img.shields.io/badge/Django-4.2+-green.svg)](https://djangoproject.com)
