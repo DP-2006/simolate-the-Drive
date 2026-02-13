@@ -1,5 +1,3 @@
-<div align="center">
-  <img src="https://raw.githubusercontent.com/yourusername/kiosk-django/main/docs/logo.png" alt="Kiosk Logo" width="200"/>
   
   # 🏪 SAFEDRIVE - Advanced File Management System (SAFA)
   
