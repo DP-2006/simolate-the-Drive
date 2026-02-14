@@ -92,13 +92,3 @@
 - Toast notifications
 - Real-time updates with AJAX
 
----
-
-## 🚀 **Quick Start**
-
-### 📋 **Prerequisites**
-```bash
-Python 3.8+
-Git
-Virtualenv (recommended)
-
