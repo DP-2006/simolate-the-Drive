@@ -91,4 +91,10 @@
 - Dark/Light mode ready
 - Toast notifications
 - Real-time updates with AJAX
+- 
+
+
+-**"Please note: This project is not complete and has some issues, but it will be improved over time. Your feedback and suggestions are welcome. Thank you for your attention to this matter."**
+
+
 
