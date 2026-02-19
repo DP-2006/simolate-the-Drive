@@ -96,6 +96,11 @@ class PasswordPolicy(models.Model):
 
     def __str__(self):
         return "تنظیمات رمز عبور"
+class Autentication User(model.MOdel):
+#this class for manage the Acsses systemicale for superadmin 
+when create the new role
+    pass 
+
 
 
 
