@@ -94,11 +94,9 @@
 - 
 - "This is an organizational tool that has various capabilities for data security, users, and monitoring employees. This program is not fully developed and is in its early stages, and it is full of bugs and          unreadable code.
 
- **Thank you for your attention to this matter."**
 
 
-
--**"Please note: This project is not complete and has some issues, but it will be improved over time. Your feedback and suggestions are welcome. Thank you for your attention to this matter."**
+-**"Please note: This project is not complete and has some issues, but it will be improved over time. Your feedback and suggestions are welcome.Thank you for your attention to this matter."**
 
 
 
