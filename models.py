@@ -1,33 +1,3 @@
-# from django.db import models
-# from django.contrib.auth.models import User
-
-# class UploadedFile(models.Model):
-#     file = models.FileField(upload_to='uploads/')
-#     uploaded_at = models.DateTimeField(auto_now_add=True)
-#     uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE)
-#     folder_name = models.CharField(max_length=255, blank=True, null=True)
-#     is_deleted = models.BooleanField(default=False) # نرم‌افزار حذف
-
-#     def __str__(self):
-#         return f"{self.file.name}"
-
-# class UserSettings(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     font_size = models.IntegerField(default=14)
-#     menu_size = models.IntegerField(default=200) # عرض منو
-#     button_size = models.IntegerField(default=40) # ارتفاع دکمه‌ها
-# class DownloderFile(models.Model):
-#     file = models.FieldFile(download_to = 'downloads/')
-#     DownloderFile_by = models.ForeignKey(User,on_delete=models.CASCADE)
-    
-    
-
-
-
-#     def __str__(self):
-#         return f"Settings for {self.user.username}"
-
-
 
 from django.db import models
 # from django.contrib.auth.models import User
